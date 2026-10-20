@@ -1,0 +1,651 @@
+<!DOCTYPE html>
+<html lang="es" data-modo="jugar">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1524">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lápiz de Tomás">
+<title>El lápiz de Tomás</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ffcc4d'/%3E%3Cpath d='M42 12l10 10-26 26H16V38z' fill='none' stroke='%231b1f2e' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='16' fill='%23ffcc4d'/%3E%3Cpath d='M42 12l10 10-26 26H16V38z' fill='none' stroke='%231b1f2e' stroke-width='5' stroke-linejoin='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap">
+<script>
+/* ============================================================
+   CONFIGURACIÓN: pegá acá la URL de tu Apps Script (termina en /exec)
+   ============================================================ */
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycby8g7q9octdlGwzqY709d7S-wojZNOAt9xLRPj0wkpvi4zZ6EatlO48GpOJB1sqdK5u/exec';
+</script>
+<style>
+/* App de una columna con marco de celular en pantallas grandes; azul noche, tarjetas translúcidas, acento amarillo lápiz */
+:root{
+  --bg:#0f1524; --bg2:#161e33; --card:rgba(255,255,255,.05); --card-solid:#141c31; --stroke:rgba(255,255,255,.10);
+  --ink:#f3f5fb; --soft:#a9b3cc; --accent:#ffcc4d; --accent-ink:#1b1f2e; --coral:#ff7a6b; --mint:#5fe0a8; --sky:#7cc4ff;
+  --lv1:#ff8d7e; --lv1-bg:rgba(255,122,107,.15); --lv2:#ffc857; --lv2-bg:rgba(255,200,87,.15); --lv3:#5fe0a8; --lv3-bg:rgba(95,224,168,.15);
+  --f-display:"Fredoka","Trebuchet MS",system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --r:18px; color-scheme:dark;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{height:100%}
+body{margin:0;min-height:100%;background:#0a0f1c;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5;
+  background-image:radial-gradient(900px 500px at -10% -10%,rgba(255,204,77,.12),transparent 60%),radial-gradient(800px 500px at 110% 110%,rgba(95,224,168,.09),transparent 60%);background-attachment:fixed}
+[hidden]{display:none!important}
+img,svg{max-width:100%}
+
+.app{max-width:480px;margin:0 auto;min-height:100vh;min-height:100dvh;background:var(--bg);display:flex;flex-direction:column;position:relative}
+@media (min-width:600px){.app{margin:24px auto;min-height:calc(100vh - 48px);border-radius:32px;border:1px solid var(--stroke);box-shadow:0 30px 80px rgba(0,0,0,.5);overflow:hidden}}
+
+.top{position:sticky;top:0;z-index:10;display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:calc(12px + env(safe-area-inset-top,0px)) max(16px,env(safe-area-inset-right,0px)) 12px max(16px,env(safe-area-inset-left,0px));
+  background:rgba(15,21,36,.92);backdrop-filter:blur(10px);border-bottom:1px solid var(--stroke)}
+.brand{display:flex;align-items:center;gap:10px;min-width:0}
+.logo{width:38px;height:38px;border-radius:12px;background:var(--accent);display:grid;place-items:center;flex:none}
+.logo svg{width:22px;height:22px}
+.brand b{font-family:var(--f-display);font-weight:600;font-size:1.1rem;display:block;line-height:1.1}
+.brand small{font-size:.68rem;letter-spacing:.08em;text-transform:uppercase;color:var(--soft)}
+.prog{display:flex;align-items:center;gap:8px;font-size:.78rem;color:var(--soft);font-variant-numeric:tabular-nums}
+.prog .track{width:70px;height:7px;border-radius:99px;background:var(--stroke);overflow:hidden}
+.prog .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--mint));border-radius:99px;transition:width .5s ease}
+
+main{flex:1;padding:16px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px))}
+
+.tabs{position:sticky;bottom:0;z-index:10;display:grid;grid-template-columns:1fr 1fr;background:rgba(15,21,36,.95);backdrop-filter:blur(10px);border-top:1px solid var(--stroke);
+  padding:6px max(10px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(10px,env(safe-area-inset-left,0px))}
+.tab{font:inherit;font-size:.78rem;font-weight:700;background:none;border:0;color:var(--soft);display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;border-radius:14px;cursor:pointer}
+.tab svg{width:22px;height:22px}
+.tab[aria-selected="true"]{color:var(--accent);background:rgba(255,204,77,.08)}
+
+h1,h2,h3{font-family:var(--f-display);font-weight:600;text-wrap:balance;margin:0;letter-spacing:-.01em}
+h1{font-size:2.1rem;line-height:1.08}
+h2{font-size:1.6rem;line-height:1.15}
+h3{font-size:1.15rem}
+p{margin:0}
+.hl{color:var(--accent)}
+.page{display:flex;flex-direction:column;gap:18px;animation:in .35s ease}
+@keyframes in{from{opacity:.4;transform:translateX(10px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.eyebrow{display:inline-flex;align-self:flex-start;font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--accent);background:rgba(255,204,77,.12);padding:5px 12px;border-radius:99px}
+.lead{color:var(--soft)}
+.lead b{color:var(--ink)}
+.card{background:var(--card);border:1px solid var(--stroke);border-radius:var(--r);padding:16px}
+
+.btn{font:inherit;font-family:var(--f-display);font-weight:600;font-size:1.05rem;background:var(--accent);color:var(--accent-ink);border:0;border-radius:16px;padding:15px 22px;cursor:pointer;width:100%;
+  box-shadow:0 8px 24px rgba(255,204,77,.22);display:flex;align-items:center;justify-content:center;gap:10px;transition:transform .12s}
+.btn:active{transform:scale(.98)}
+.btn:disabled{opacity:.35;cursor:not-allowed;box-shadow:none}
+.btn.sec{background:var(--bg2);color:var(--ink);border:1px solid var(--stroke);box-shadow:none}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+[tabindex="-1"]:focus{outline:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+
+.scene{border-radius:var(--r);overflow:hidden;border:1px solid var(--stroke);background:var(--card)}
+.yard{position:relative;height:200px}
+.yard > svg.bgs{position:absolute;inset:0;width:100%;height:100%}
+.floor{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:space-evenly;align-items:flex-end;padding-inline:4px}
+.kid{display:flex;flex-direction:column;align-items:center;gap:2px;min-width:0}
+.kid svg{width:58px;height:76px;filter:drop-shadow(0 4px 3px rgba(0,0,0,.25))}
+.kid b{font-family:var(--f-display);font-weight:600;font-size:.72rem;background:rgba(15,21,36,.8);color:#fff;padding:1px 8px;border-radius:99px;white-space:nowrap}
+.noise{position:absolute;top:10px;left:10px;display:flex;align-items:center;gap:8px;background:rgba(15,21,36,.8);color:#fff;border-radius:99px;padding:5px 10px;font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;font-weight:700}
+.noise .bar{width:70px;height:7px;border-radius:99px;background:rgba(255,255,255,.2);overflow:hidden}
+.noise .f{height:100%;width:15%;background:linear-gradient(90deg,var(--accent),var(--coral));transition:width 1s ease}
+.chat{display:flex;flex-direction:column;gap:8px;padding:14px}
+.chat:empty{display:none}
+.bubble{background:var(--bg2);border:1px solid var(--stroke);border-radius:18px 18px 18px 6px;padding:9px 13px;max-width:90%;animation:pop .3s ease both;font-size:.95rem}
+.bubble.r{align-self:flex-end;border-radius:18px 18px 6px 18px;background:rgba(124,196,255,.10)}
+.bubble strong{font-family:var(--f-display);font-weight:600;color:var(--accent);display:block;font-size:.8rem}
+@keyframes pop{from{opacity:0;transform:translateY(6px) scale(.97)}to{opacity:1;transform:none}}
+
+.compare{display:grid;gap:10px}
+.compare > div{background:var(--card);border:1px solid var(--stroke);border-radius:16px;padding:14px;display:flex;flex-direction:column;gap:8px;min-width:0}
+.compare svg{width:100%;max-width:240px;height:auto}
+.compare ul{margin:0;padding-left:18px;font-size:.92rem;color:var(--soft)}
+.compare .q{color:var(--accent);font-weight:700}
+.tag{font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--sky);font-weight:700}
+
+.ctx{display:flex;gap:12px;align-items:flex-start}
+.ctx .ic{flex:none;width:32px;height:32px;border-radius:10px;background:rgba(124,196,255,.15);color:var(--sky);display:grid;place-items:center;font-family:var(--f-display);font-weight:700}
+.ctx p{min-width:0;font-size:.95rem}
+.opts{display:flex;flex-direction:column;gap:10px}
+.opt{font:inherit;font-size:.95rem;text-align:left;display:grid;grid-template-columns:40px 1fr;gap:12px;align-items:center;background:var(--card);color:var(--ink);border:1.5px solid var(--stroke);border-radius:16px;padding:14px;cursor:pointer;transition:border-color .15s,background .15s}
+.opt:hover{border-color:var(--accent);background:rgba(255,204,77,.06)}
+.opt .l{font-family:var(--f-display);font-weight:700;font-size:1.1rem;width:40px;height:40px;border-radius:12px;background:var(--bg2);border:1px solid var(--stroke);display:grid;place-items:center;color:var(--accent)}
+.opt span:last-child{min-width:0}
+.timer{display:inline-flex;align-items:center;gap:8px;font-size:.82rem;color:var(--soft);font-variant-numeric:tabular-nums}
+.dot{width:8px;height:8px;border-radius:50%;background:var(--coral);animation:blink 1s infinite}
+@keyframes blink{50%{opacity:.3}}
+
+.verdict{display:grid;grid-template-columns:auto 1fr;gap:16px;align-items:center}
+.ring{width:76px;height:76px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:700;font-size:1.8rem}
+.ring small{display:block;font-size:.66rem;font-weight:600;margin-top:-6px;text-align:center}
+.verdict > div{min-width:0;display:flex;flex-direction:column;gap:6px}
+.badge{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:.76rem;padding:4px 11px;border-radius:99px;align-self:flex-start;white-space:nowrap}
+.lv1{color:var(--lv1);background:var(--lv1-bg)}.lv2{color:var(--lv2);background:var(--lv2-bg)}.lv3{color:var(--lv3);background:var(--lv3-bg)}
+.concept{background:linear-gradient(135deg,rgba(124,196,255,.12),rgba(95,224,168,.08));border:1px solid rgba(124,196,255,.25);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:6px}
+.alt{border-left:3px solid var(--mint);padding:4px 0 4px 12px;color:var(--soft);font-size:.95rem}
+.alt b{color:var(--mint)}
+.muted{font-size:.86rem;color:var(--soft)}
+
+.wits{display:flex;flex-direction:column;gap:10px}
+.wit{background:var(--card);border:1.5px solid var(--stroke);border-radius:16px;padding:12px;display:grid;grid-template-columns:52px 1fr;gap:12px;align-items:start;transition:border-color .2s}
+.wit svg{width:52px;height:68px}
+.wit > div{min-width:0;display:flex;flex-direction:column;gap:6px}
+.wit.heard{border-color:rgba(95,224,168,.5)}
+.wit .nm{font-family:var(--f-display);font-weight:600;font-size:1.05rem}
+.quote{font-style:italic;font-size:.95rem}
+.chip{font:inherit;font-size:.85rem;font-weight:700;border:1.5px solid var(--stroke);background:var(--bg2);color:var(--ink);border-radius:99px;padding:7px 14px;cursor:pointer;align-self:flex-start}
+.chip:hover{border-color:var(--accent)}
+.chip.sel-h{background:var(--lv3-bg);color:var(--lv3);border-color:var(--lv3)}
+.chip.sel-s{background:var(--lv2-bg);color:var(--lv2);border-color:var(--lv2)}
+.meter{display:flex;align-items:center;gap:10px;font-size:.85rem;color:var(--soft)}
+.meter .track{flex:1;height:7px;border-radius:99px;background:var(--stroke);overflow:hidden}
+.meter .fill{height:100%;width:0;background:var(--mint);transition:width .3s}
+.stmt{background:var(--card);border:1.5px solid var(--stroke);border-radius:16px;padding:13px 14px;display:flex;flex-direction:column;gap:10px}
+.stmt.ok{border-color:rgba(95,224,168,.6)}.stmt.bad{border-color:rgba(255,122,107,.6)}
+.defs{display:grid;gap:8px}
+.defs > div{border-radius:14px;padding:10px 12px;font-size:.92rem}
+
+.hero-res{display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.gauge{position:relative;width:160px;height:160px}
+.gauge svg{width:160px;height:160px;transform:rotate(-90deg)}
+.gauge .c{position:absolute;inset:0;display:grid;place-items:center;text-align:center}
+.gauge .n{font-family:var(--f-display);font-weight:700;font-size:3.2rem;line-height:1}
+.gauge .of{font-size:.82rem;color:var(--soft)}
+.hero-res .badge{align-self:center}
+.send{display:flex;align-items:center;gap:10px;justify-content:center;font-size:.88rem;font-weight:700;border-radius:14px;padding:10px 12px;border:1px solid var(--stroke)}
+.send.ok{color:var(--lv3);background:var(--lv3-bg);border-color:transparent}
+.send.err{color:var(--lv1);background:var(--lv1-bg);border-color:transparent;flex-wrap:wrap}
+.send.wait{color:var(--soft)}
+.recap{display:flex;flex-direction:column;gap:8px}
+.recap > div{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:10px 12px}
+.recap .num{font-family:var(--f-display);font-weight:700;width:30px;height:30px;border-radius:9px;background:var(--bg2);display:grid;place-items:center;color:var(--accent)}
+.recap p{min-width:0;font-size:.88rem}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.stats > div{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:12px;min-width:0}
+.stats b{font-family:var(--f-display);font-weight:700;font-size:1.5rem;display:block;font-variant-numeric:tabular-nums;color:var(--accent)}
+.stats small{font-size:.74rem;color:var(--soft);display:block;line-height:1.3}
+.medals{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.medal{border:1px dashed var(--stroke);border-radius:14px;padding:10px 12px;opacity:.45;display:flex;flex-direction:column;gap:3px}
+.medal.got{opacity:1;border:1px solid rgba(255,204,77,.5);background:rgba(255,204,77,.08)}
+.medal b{font-family:var(--f-display);font-weight:600;font-size:.95rem}
+.medal small{font-size:.76rem;color:var(--soft)}
+.levels{display:flex;flex-direction:column;gap:8px}
+.levels > div{display:flex;flex-direction:column;gap:6px;padding:12px;border-radius:14px;border:1px solid var(--stroke);font-size:.9rem;opacity:.6}
+.levels > div.hit{opacity:1;border-color:var(--accent);background:rgba(255,204,77,.07)}
+
+.field{display:flex;flex-direction:column;gap:6px}
+label{font-weight:700;font-size:.88rem}
+input[type=text],input[type=password],select{font:inherit;width:100%;padding:13px 14px;border:1.5px solid var(--stroke);border-radius:14px;background:var(--bg2);color:var(--ink)}
+input:focus,select:focus{border-color:var(--accent);outline:none;box-shadow:0 0 0 4px rgba(255,204,77,.18)}
+.err-msg{color:var(--lv1);font-size:.86rem}
+
+/* panel */
+.kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.kpis > div{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:12px;min-width:0}
+.kpis b{font-family:var(--f-display);font-weight:700;font-size:1.6rem;display:block;font-variant-numeric:tabular-nums}
+.kpis small{font-size:.74rem;color:var(--soft);display:block;line-height:1.3}
+.stack{display:flex;height:16px;border-radius:99px;overflow:hidden;background:var(--stroke)}
+.stack span{height:100%}
+.legend{display:flex;gap:12px;flex-wrap:wrap;font-size:.8rem;color:var(--soft)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:5px;vertical-align:-1px}
+.dec{display:flex;flex-direction:column;gap:8px}
+.bars{display:flex;flex-direction:column;gap:6px}
+.bar{display:grid;grid-template-columns:70px 1fr 42px;gap:8px;align-items:center;font-size:.82rem}
+.bar .t{height:12px;border-radius:99px;background:var(--stroke);overflow:hidden}
+.bar .t span{display:block;height:100%;border-radius:99px}
+.bar em{font-style:normal;text-align:right;color:var(--soft);font-variant-numeric:tabular-nums}
+.conc{background:linear-gradient(135deg,rgba(255,204,77,.12),rgba(95,224,168,.08));border:1px solid rgba(255,204,77,.3);border-radius:var(--r);padding:16px;display:flex;flex-direction:column;gap:8px}
+.conc ul{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px;font-size:.93rem}
+.tbl{overflow-x:auto;border:1px solid var(--stroke);border-radius:14px}
+table{border-collapse:collapse;width:100%;min-width:420px;font-size:.84rem}
+th,td{text-align:left;padding:9px 10px;border-bottom:1px solid var(--stroke);white-space:nowrap}
+th{font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--soft);background:var(--card-solid)}
+td.num{font-variant-numeric:tabular-nums}
+tr:last-child td{border-bottom:0}
+details{background:var(--card);border:1px solid var(--stroke);border-radius:14px;padding:12px 14px}
+summary{cursor:pointer;font-weight:700}
+details[open] summary{margin-bottom:10px}
+details .lvl{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;font-size:.88rem;margin-bottom:6px}
+.example{font-size:.78rem;font-weight:700;color:var(--sky);background:rgba(124,196,255,.12);padding:4px 10px;border-radius:99px;align-self:flex-start}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="top">
+    <div class="brand">
+      <div class="logo"><svg viewBox="0 0 24 24" fill="none" stroke="#1b1f2e" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 3l4 4L8 20H4v-4z"/><path d="M14 6l4 4"/></svg></div>
+      <div><b>El lápiz de Tomás</b><small>Filosofía y Conocimiento</small></div>
+    </div>
+    <div class="prog" id="prog" aria-label="Progreso"><div class="track"><div class="fill" id="pfill"></div></div><span id="ptxt">0/3</span></div>
+  </header>
+
+  <main>
+    <div id="game"></div>
+    <div id="panel" hidden></div>
+  </main>
+
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const game=$('#game'), panel=$('#panel');
+
+/* ---------- modo ---------- */
+const MODO=document.documentElement.dataset.modo||'jugar';
+/* ---------- personajes ---------- */
+const KIDS={
+  tomas:{n:'Tomás',skin:'#f1c7a1',hair:'#5a3a1e',shirt:'#5b8bd9'},
+  mateo:{n:'Mateo',skin:'#d9a37b',hair:'#1f1a17',shirt:'#e0794f'},
+  valentina:{n:'Valentina',skin:'#f3d2b3',hair:'#8a4b22',shirt:'#9b6bd1',long:true},
+  joaquin:{n:'Joaquín',skin:'#c48a62',hair:'#2b2016',shirt:'#3fae7a'},
+  martina:{n:'Martina',skin:'#f6d7bd',hair:'#d8a03a',shirt:'#e05a8a',long:true},
+  coro:{n:'Compañeros',skin:'#e7b994',hair:'#6b4a2b',shirt:'#9aa6b8'}
+};
+function kidSVG(k,mood){
+  const c=KIDS[k];
+  const mouth={sad:'M24 41 q8 -6 16 0',angry:'M24 41 h16',happy:'M24 38 q8 7 16 0',worried:'M25 41 q7 -3 14 0'}[mood||'happy'];
+  const brows=mood==='angry'?'<path d="M20 25 l8 3 M44 25 l-8 3" stroke="#222" stroke-width="2.2" stroke-linecap="round"/>':mood==='worried'?'<path d="M20 26 l8 -2 M44 26 l-8 -2" stroke="#222" stroke-width="2" stroke-linecap="round"/>':'';
+  const blush=mood==='happy'?'<circle cx="21" cy="37" r="3" fill="#ff8a8a" opacity=".45"/><circle cx="43" cy="37" r="3" fill="#ff8a8a" opacity=".45"/>':'';
+  const hair=c.long
+    ?`<path d="M12 32 q0 -24 20 -24 q20 0 20 24 v18 h-6 v-22 q-14 -6 -28 0 v22 h-6z" fill="${c.hair}"/>`
+    :`<path d="M13 30 q0 -22 19 -22 q19 0 19 22 q-6 -10 -19 -10 q-13 0 -19 10z" fill="${c.hair}"/>`;
+  return `<svg viewBox="0 0 64 84" aria-hidden="true">
+    <path d="M14 84 l4 -28 q14 -6 28 0 l4 28z" fill="#ffffff" stroke="#c7cfdd" stroke-width="1.2"/>
+    <path d="M28 56 l4 8 l4 -8" fill="${c.shirt}"/>
+    ${c.long?hair:''}<circle cx="32" cy="32" r="18" fill="${c.skin}"/>${c.long?'':hair}
+    ${brows}${blush}
+    <circle cx="25" cy="31" r="2.4" fill="#222"/><circle cx="39" cy="31" r="2.4" fill="#222"/>
+    <path d="${mouth}" stroke="#222" stroke-width="2.2" fill="none" stroke-linecap="round"/>
+  </svg>`;
+}
+const kid=(k,mood)=>`<div class="kid">${kidSVG(k,mood)}<b>${KIDS[k].n}</b></div>`;
+const BG=`<svg class="bgs" viewBox="0 0 800 250" preserveAspectRatio="xMidYMax slice" aria-hidden="true">
+  <defs><linearGradient id="win" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6fb9f5"/><stop offset="1" stop-color="#cdeeff"/></linearGradient></defs>
+  <rect width="800" height="250" fill="#f3e6cc"/><rect y="150" width="800" height="30" fill="#c9d9ea"/>
+  <rect x="34" y="36" width="140" height="100" rx="4" fill="#fff"/><rect x="40" y="42" width="128" height="88" fill="url(#win)"/>
+  <circle cx="140" cy="66" r="12" fill="#ffd75e"/><path d="M104 42 V130 M40 86 H168" stroke="#fff" stroke-width="5"/>
+  <rect x="222" y="22" width="356" height="122" rx="6" fill="#8a5a3b"/><rect x="230" y="30" width="340" height="106" fill="#2f5d4a"/>
+  <text x="250" y="62" fill="#eef5ee" font-family="Trebuchet MS,sans-serif" font-size="18">Actividad de Lengua</text>
+  <path d="M250 80 h180 M250 100 h220 M250 120 h140" stroke="#eef5ee" stroke-width="2.5" stroke-linecap="round" opacity=".55"/>
+  <rect x="230" y="136" width="340" height="6" fill="#6e452c"/>
+  <circle cx="690" cy="66" r="28" fill="#fff" stroke="#8a5a3b" stroke-width="4"/><path d="M690 66 V48 M690 66 L703 72" stroke="#1b1f2e" stroke-width="3" stroke-linecap="round"/>
+  <rect y="178" width="800" height="72" fill="#b98b5e"/><g stroke="#a67a4f" stroke-width="2"><path d="M0 198 H800 M0 222 H800"/></g>
+  <g><rect x="620" y="150" width="140" height="12" rx="3" fill="#d39a5c"/><rect x="630" y="162" width="8" height="40" fill="#7a5233"/><rect x="742" y="162" width="8" height="40" fill="#7a5233"/>
+  <rect x="660" y="144" width="40" height="6" rx="3" fill="#ffcc4d"/><polygon points="700,144 708,147 700,150" fill="#f3d6a8"/></g>
+  <g><rect x="40" y="150" width="140" height="12" rx="3" fill="#d39a5c"/><rect x="50" y="162" width="8" height="40" fill="#7a5233"/><rect x="162" y="162" width="8" height="40" fill="#7a5233"/>
+  <rect x="70" y="140" width="34" height="10" fill="#fff" stroke="#c9d9ea"/></g>
+</svg>`;
+const scene=(kids,extra='',chat='')=>`<div class="scene"><div class="yard">${BG}${extra}<div class="floor">${kids}</div></div><div class="chat" id="bub">${chat}</div></div>`;
+const pencil=`<svg viewBox="0 0 260 60" aria-hidden="true"><rect x="40" y="18" width="170" height="24" rx="3" fill="#e8b833"/><rect x="18" y="18" width="22" height="24" rx="6" fill="#f29bb5"/><rect x="36" y="18" width="10" height="24" fill="#c7cfdd"/><polygon points="210,18 244,30 210,42" fill="#f3d6a8"/><polygon points="234,26 244,30 234,34" fill="#333"/></svg>`;
+
+/* ---------- datos de la consigna (orden original: A inicial, B medio, C alto) ---------- */
+const DEC=[
+ {q:'¿Cómo actuarías ante la acusación?',
+  ctx:'Tomás acusa a Mateo de haberse quedado con el lápiz que le prestó. Mateo dice que no lo tiene y que cree haberlo dejado sobre el banco. Algunos compañeros opinan y la clase se interrumpe.',
+  opts:[
+   {lv:1,t:'Le diría a Mateo que devuelva el lápiz porque Tomás asegura que se lo prestó.',
+    fb:'Tomaste como verdadera la versión de Tomás sin escuchar a Mateo. Que alguien lo asegure no alcanza para saber qué pasó.',
+    c:['Creer no es saber','Platón distinguía la opinión (doxa) del conocimiento (episteme). Lo que alguien asegura es una opinión hasta que se justifica con razones y hechos.']},
+   {lv:2,t:'Le pediría a Mateo que explique lo sucedido, pero seguiría pensando que probablemente se quedó con el lápiz.',
+    fb:'Le diste la palabra a Mateo, pero ya tenías una conclusión armada. Escuchar con la respuesta decidida no es escuchar de verdad.',
+    c:['Prejuicio','Un prejuicio es un juicio que se forma antes de conocer los hechos. Cuando ya creemos saber la respuesta, solo prestamos atención a lo que la confirma.']},
+   {lv:3,t:'Escucharía a ambos estudiantes sin acusar a ninguno y les preguntaría cuándo y dónde vieron el lápiz por última vez.',
+    fb:'No acusaste a nadie y empezaste a buscar datos concretos: cuándo y dónde se vio el lápiz. Así se pasa de la acusación a la investigación.',
+    c:['Suspender el juicio','Los filósofos escépticos llamaban epoché a no afirmar ni negar algo mientras no haya razones suficientes. Descartes propuso algo parecido: no aceptar como verdadero nada que no se conozca con claridad.']}
+  ]},
+ {q:'Aparece nueva información. ¿Qué harías?',
+  ctx:'Una compañera cuenta que vio a Mateo dejar algo sobre otro banco, pero no recuerda si era el lápiz de Tomás. Además, varios alumnos estuvieron cambiándose de lugar durante la actividad.',
+  opts:[
+   {lv:1,t:'Mantendría la acusación contra Mateo porque fue el último que usó el lápiz.',
+    fb:'Apareció información nueva y no cambiaste tu conclusión. Ser el último que usó el lápiz no prueba que se lo haya quedado.',
+    c:['Dogmatismo','Es sostener una creencia sin revisarla aunque aparezcan razones en contra. Pensar críticamente implica estar dispuesto a cambiar de opinión cuando cambian los datos.']},
+   {lv:2,t:'Pensaría que el lápiz pudo haber quedado en otro banco, pero no buscaría más información.',
+    fb:'Aceptaste otra posibilidad, pero te quedaste en la suposición. Sin revisar los bancos ni preguntar, tampoco sabés si quedó en otro lugar.',
+    c:['Hipótesis no es certeza','"Pudo haber quedado en otro banco" es una hipótesis. Para que una creencia sea conocimiento necesita estar justificada, y para eso hay que comprobarla.']},
+   {lv:3,t:'Preguntaría dónde estaba sentado Mateo, revisaría los lugares donde trabajaron y consultaría a los compañeros para intentar reconstruir lo ocurrido.',
+    fb:'Usaste el dato nuevo para investigar: revisar lugares, preguntar y reconstruir los hechos. Modificaste tu forma de ver el problema con evidencia.',
+    c:['Poner a prueba una hipótesis','Una hipótesis se pone a prueba buscando evidencia que pueda confirmarla o descartarla. Así trabaja el pensamiento científico, y también una buena docente.']}
+  ]},
+ {q:'¿Cómo resolverías el conflicto?',
+  ctx:'Después de revisar los bancos, encuentran un lápiz debajo de una mesa, pero todavía no saben con seguridad si es el de Tomás. Ambos estudiantes continúan discutiendo.',
+  opts:[
+   {lv:1,t:'Le exigiría a Mateo que se haga responsable y le pida disculpas a Tomás, aunque todavía no se haya comprobado qué pasó.',
+    fb:'Cerraste el conflicto responsabilizando a Mateo sin pruebas. Si el lápiz se cayó solo, Mateo pidió disculpas por algo que no hizo.',
+    c:['La carga de la prueba','Quien acusa tiene que mostrar por qué. Sin pruebas, no corresponde tratar a alguien como culpable. Es la idea detrás de la presunción de inocencia.']},
+   {lv:2,t:'Les pediría que dejen de discutir y continúen con la actividad, sin investigar más.',
+    fb:'Evitaste culpar a alguien, pero dejaste la investigación por la mitad, justo cuando había un lápiz para comparar. El desacuerdo sigue sin resolverse.',
+    c:['Comprender antes de cerrar','Cortar la discusión termina la escena, pero no el conflicto. Para que haya una solución justa, hace falta averiguar lo posible y que cada parte entienda a la otra.']},
+   {lv:3,t:'Compararía el lápiz encontrado con la descripción del lápiz de Tomás, escucharía a ambos y evitaría responsabilizar a alguien hasta tener más información. También los ayudaría a resolver el desacuerdo mediante el diálogo.',
+    fb:'Verificaste con un dato concreto, escuchaste a los dos y no acusaste sin pruebas. Además, ayudaste a que resolvieran el desacuerdo hablando.',
+    c:['El diálogo','Sócrates buscaba la verdad conversando, haciendo preguntas y escuchando respuestas. El diálogo permite construir una comprensión común en lugar de imponer una versión.']}
+  ]}
+];
+const WIT=[
+ {k:'tomas',m:'angry',q:'"Se lo presté a Mateo para que terminara de escribir. ¡Seguro se lo quedó!"',tip:'Mezcla un hecho (le prestó el lápiz) con una suposición (que Mateo se lo quedó).'},
+ {k:'mateo',m:'worried',q:'"Terminé de escribir y lo dejé sobre el banco. Después me cambié de lugar para la otra parte de la actividad."',tip:'Es su propia versión: hay que compararla con las demás.'},
+ {k:'joaquin',m:'worried',q:'"Yo también me cambié de banco. Había un montón de lápices dando vueltas por las mesas."',tip:'Coincide con lo que contó Valentina: varios alumnos se cambiaron de lugar.'},
+ {k:'martina',m:'angry',q:'"Mateo siempre se queda con las cosas de los demás." (Martina estaba sentada en la otra punta del aula.)',tip:'No vio lo que pasó. Opina a partir de una generalización.'}
+];
+const STM=[
+ {t:'Tomás le prestó un lápiz a Mateo.',a:'h',w:'Lo dicen Tomás y Mateo, y nadie lo discute.'},
+ {t:'Mateo se quedó con el lápiz.',a:'s',w:'Es lo que se está tratando de averiguar. Nadie lo comprobó.'},
+ {t:'Varios alumnos se cambiaron de lugar durante la actividad.',a:'h',w:'Lo cuentan Valentina, Mateo y Joaquín por separado.'},
+ {t:'Como Mateo fue el último que lo usó, él lo tiene.',a:'s',w:'Usarlo último no prueba que lo tenga: pudo quedar en un banco.'},
+ {t:'Valentina vio a Mateo dejar algo sobre otro banco.',a:'h',w:'Es lo que ella misma declaró.'},
+ {t:'Lo que dejó Mateo era el lápiz de Tomás.',a:'s',w:'Valentina no recuerda qué era.'}
+];
+const MX=['Reacciona por impulso, acepta una acusación sin verificarla y responsabiliza a un compañero basándose en suposiciones.',
+  'Considera otras posibilidades, pero realiza una comprobación parcial o toma una decisión sin contar con suficiente información.',
+  'Escucha las distintas versiones, observa los hechos, busca y compara información y modifica sus conclusiones cuando aparecen nuevos datos. Evita acusar sin pruebas y busca resolver el conflicto de manera justa.'];
+const INTERP=['','Necesita mejorar la capacidad de verificar los hechos antes de sacar conclusiones.',
+  'Considera diferentes explicaciones, pero necesita profundizar la búsqueda y comprobación de información.',
+  'Analiza las distintas versiones, verifica los datos disponibles y toma decisiones fundamentadas.'];
+const lvName=l=>['','Inicial','Medio','Alto'][l];
+const levelOf=p=>p<=4?1:p<=7?2:3;
+const AR='<span aria-hidden="true">→</span>';
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+/* ---------- estado del juego ---------- */
+let S, timerInt=null;
+function reset(){S={name:'',curso:'',ans:[null,null,null],times:[0,0,0],heard:new Set(),sort:{},order:DEC.map(()=>shuffle([0,1,2])),sent:false};}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function prog(n){$('#pfill').style.width=(n/3*100)+'%';$('#ptxt').textContent=n+'/3';}
+function show(html,n){clearInterval(timerInt);game.innerHTML=`<section class="page">${html}</section>`;prog(n);window.scrollTo({top:0});const f=game.querySelector('h1,h2');if(f){f.setAttribute('tabindex','-1');f.focus({preventScroll:true});}}
+const g=s=>game.querySelector(s);
+
+function intro(){
+  let saved={};try{saved=JSON.parse(localStorage.getItem('lapiz-datos')||'{}');}catch(e){}
+  show(`
+   <span class="eyebrow">Simulación · 3 decisiones</span>
+   <h1>Hoy te toca ser <span class="hl">la docente</span>.</h1>
+   <p class="lead">Tus alumnos están haciendo una actividad. Tomás le presta un lápiz a Mateo para que termine de escribir. Cuando lo quiere recuperar, el lápiz no aparece. Tu trabajo es <b>decidir cómo actuar</b> a medida que aparece información nueva.</p>
+   ${scene(kid('martina','happy')+kid('tomas','happy')+kid('mateo','happy')+kid('joaquin','happy')+kid('valentina','happy'))}
+   <div class="field"><label for="name">Nombre y apellido</label><input type="text" id="name" maxlength="60" placeholder="Ej.: Laura Gómez" autocomplete="name" value="${esc(saved.n||'')}"></div>
+   <div class="field"><label for="curso">Curso o comisión <span class="muted">(opcional)</span></label><input type="text" id="curso" maxlength="40" placeholder="Ej.: 1.° A" value="${esc(saved.c||'')}"></div>
+   <p class="err-msg" id="nameErr" hidden>Escribí tu nombre para empezar.</p>
+   <button class="btn" id="go" type="button">Empezar ${AR}</button>
+   <p class="muted">Al terminar, tus respuestas se envían a la docente. No hay respuestas "trampa": se observa cómo llegás a tus decisiones.</p>
+  `,0);
+  g('#go').onclick=()=>{
+    const n=g('#name').value.trim(); if(!n){g('#nameErr').hidden=false;g('#name').focus();return;}
+    S.name=n;S.curso=g('#curso').value.trim();
+    try{localStorage.setItem('lapiz-datos',JSON.stringify({n:S.name,c:S.curso}));}catch(e){}
+    scene1();};
+}
+
+function scene1(){
+  show(`
+   <span class="eyebrow">Escena 1 · Fin de la actividad</span>
+   <h2>"¿Y mi lápiz?"</h2>
+   ${scene(kid('martina','angry')+kid('tomas','angry')+kid('mateo','worried')+kid('coro','worried'),'<div class="noise">Ruido en el aula <div class="bar"><div class="f" id="noise"></div></div></div>')}
+   <button class="btn" id="go" type="button" disabled>Intervenir ${AR}</button>
+  `,0);
+  const lines=[['tomas','Mateo, devolveme el lápiz que te presté.',0],['mateo','No lo tengo. Creo que lo dejé sobre el banco.',1],['tomas','¡Mentira! ¡Te lo quedaste vos!',0],['coro','Tiene que devolverlo, fue el último que lo usó.',1],['coro','Yo no sé qué pasó…',1],['tomas','¡Seño! ¡Mateo no me quiere devolver el lápiz!',0]];
+  const bub=g('#bub'),noise=g('#noise');let i=0;
+  const reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const add=()=>{if(!document.body.contains(bub))return;const[l,t,r]=lines[i];bub.insertAdjacentHTML('beforeend',`<div class="bubble ${r?'r':''}"><strong>${KIDS[l].n}</strong>${t}</div>`);i++;noise.style.width=(15+i*14)+'%';
+    if(i<lines.length)setTimeout(add,reduce?0:850);else g('#go').disabled=false;};
+  add();
+  g('#go').onclick=()=>decision(0);
+}
+
+function decision(d){
+  const D=DEC[d];
+  show(`
+   <span class="eyebrow">Decisión ${d+1} de 3</span>
+   <h2>${D.q}</h2>
+   <div class="card ctx"><div class="ic">i</div><p>${D.ctx}</p></div>
+   <div class="opts" role="group" aria-label="Opciones">
+     ${S.order[d].map((oi,pos)=>`<button class="opt" type="button" data-o="${oi}"><span class="l">${'ABC'[pos]}</span><span>${D.opts[oi].t}</span></button>`).join('')}
+   </div>
+   <span class="timer"><span class="dot"></span><span id="tm">Pensando: 0 s</span></span>
+  `,d);
+  const t0=performance.now();
+  timerInt=setInterval(()=>{const e=g('#tm');if(e)e.textContent='Pensando: '+Math.round((performance.now()-t0)/1000)+' s';},1000);
+  game.querySelectorAll('.opt').forEach(b=>b.onclick=()=>{S.ans[d]=+b.dataset.o;S.times[d]=(performance.now()-t0)/1000;feedback(d);});
+}
+
+function feedback(d){
+  const o=DEC[d].opts[S.ans[d]],best=DEC[d].opts[2],t=S.times[d];
+  const next=d===0?scene2:d===1?scene3:results;
+  show(`
+   <span class="eyebrow">Devolución · Decisión ${d+1}</span>
+   <div class="verdict">
+     <div class="ring lv${o.lv}"><div>+${o.lv}<small>${o.lv===1?'punto':'puntos'}</small></div></div>
+     <div><span class="badge lv${o.lv}">Nivel ${lvName(o.lv)}</span><h2>${o.lv===3?'Bien pensado.':o.lv===2?'Vas bien, pero faltó algo.':'Cuidado con el apuro.'}</h2></div>
+   </div>
+   <p class="lead">${o.fb}</p>
+   <div class="concept"><span class="tag">Para pensar</span><h3>${o.c[0]}</h3><p>${o.c[1]}</p></div>
+   ${o.lv<3?`<p class="alt"><b>Respuesta de nivel alto:</b> ${best.t}</p>`:''}
+   <p class="muted">${t<5?`Decidiste en ${t.toFixed(1)} s. Fue rápido: ¿leíste todas las opciones con calma?`:`Te tomaste ${t.toFixed(1)} s para decidir.`}</p>
+   <button class="btn" id="go" type="button">${d<2?'Seguir':'Ver mis resultados'} ${AR}</button>
+  `,d+1);
+  g('#go').onclick=next;
+}
+
+function scene2(){
+  show(`
+   <span class="eyebrow">Escena 2 · Nueva información</span>
+   <h2>Valentina levanta la mano.</h2>
+   ${scene(kid('valentina','worried'),'','<div class="bubble"><strong>Valentina</strong>Seño, yo vi a Mateo dejar algo sobre otro banco, pero no me acuerdo si era el lápiz de Tomás. Además, varios nos cambiamos de lugar durante la actividad.</div>')}
+   <h3>Libreta de testimonios</h3>
+   <p class="lead">Podés escuchar a quien quieras antes de decidir.</p>
+   <div class="wits">
+     ${WIT.map((w,i)=>`<div class="wit" id="w${i}">${kidSVG(w.k,w.m)}<div><span class="nm">${KIDS[w.k].n}</span><div id="wq${i}"><button class="chip" type="button" data-w="${i}">Escuchar</button></div></div></div>`).join('')}
+   </div>
+   <div class="meter"><span id="hc">0 de ${WIT.length} escuchados</span><div class="track"><div class="fill" id="hf"></div></div></div>
+   <button class="btn" id="go" type="button">Ordenar lo que sé ${AR}</button>
+  `,1);
+  game.querySelectorAll('[data-w]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.w,w=WIT[i];S.heard.add(i);
+    g('#wq'+i).innerHTML=`<p class="quote">${w.q}</p><p class="muted">${w.tip}</p>`;
+    g('#w'+i).classList.add('heard');g('#hc').textContent=`${S.heard.size} de ${WIT.length} escuchados`;g('#hf').style.width=(S.heard.size/WIT.length*100)+'%';});
+  g('#go').onclick=sortGame;
+}
+
+function sortGame(){
+  show(`
+   <span class="eyebrow">Minijuego</span>
+   <h2>¿Hecho o suposición?</h2>
+   <div class="defs"><div class="lv3"><b>Hecho:</b> se puede comprobar o lo confirman varias fuentes.</div><div class="lv2"><b>Suposición:</b> algo que creemos, pero no está comprobado.</div></div>
+   ${STM.map((s,i)=>`<div class="stmt" id="s${i}"><p>${s.t}</p><div class="row"><button class="chip" type="button" data-s="${i}" data-a="h">Hecho</button><button class="chip" type="button" data-s="${i}" data-a="s">Suposición</button></div><p class="muted" id="sw${i}" hidden></p></div>`).join('')}
+   <div class="meter"><span id="sc">0 de ${STM.length} clasificadas</span><div class="track"><div class="fill" id="sf"></div></div></div>
+   <button class="btn" id="go" type="button" disabled>Ir a la decisión 2 ${AR}</button>
+  `,1);
+  game.querySelectorAll('[data-s]').forEach(b=>b.onclick=()=>{
+    const i=+b.dataset.s;if(S.sort[i]!==undefined)return;
+    const a=b.dataset.a,ok=a===STM[i].a;S.sort[i]=ok;
+    b.classList.add(a==='h'?'sel-h':'sel-s');g('#s'+i).classList.add(ok?'ok':'bad');
+    const w=g('#sw'+i);w.hidden=false;w.textContent=(ok?'✓ Correcto. ':'✗ Es '+(STM[i].a==='h'?'un hecho':'una suposición')+'. ')+STM[i].w;
+    const n=Object.keys(S.sort).length;g('#sc').textContent=`${n} de ${STM.length} clasificadas`;g('#sf').style.width=(n/STM.length*100)+'%';
+    if(n===STM.length)g('#go').disabled=false;});
+  g('#go').onclick=()=>decision(1);
+}
+
+function scene3(){
+  show(`
+   <span class="eyebrow">Escena 3 · Revisando los bancos</span>
+   <h2>¡Hay un lápiz debajo de una mesa!</h2>
+   ${scene(kid('tomas','angry')+kid('mateo','worried'),'','<div class="bubble"><strong>Tomás</strong>¡Ese es el mío! Igual Mateo lo tendría que haber cuidado.</div><div class="bubble r"><strong>Mateo</strong>¿Ves? Yo no me lo quedé. ¡Te dije que lo había dejado!</div>')}
+   <div class="compare">
+     <div><span class="tag">Lo que dice Tomás de su lápiz</span><ul><li>Es amarillo, con goma rosa.</li><li>Tiene escrito "T.R." al costado.</li></ul></div>
+     <div><span class="tag">El lápiz encontrado</span>${pencil}<ul><li>Amarillo con goma rosa.</li><li class="q">No se ven iniciales: está gastado de un lado.</li></ul></div>
+   </div>
+   <div class="card ctx"><div class="ic">i</div><p>El lápiz se parece, pero <b>todavía no se sabe con seguridad si es el de Tomás</b>. Los dos siguen discutiendo.</p></div>
+   <button class="btn" id="go" type="button">Tomar la decisión final ${AR}</button>
+  `,2);
+  g('#go').onclick=()=>decision(2);
+}
+
+function payload(){
+  const pts=S.ans.reduce((s,a,d)=>s+DEC[d].opts[a].lv,0);
+  const r1=x=>Math.round(x*10)/10;
+  return {nombre:S.name,curso:S.curso,
+    d1:'ABC'[S.ans[0]],d1n:lvName(S.ans[0]+1),d2:'ABC'[S.ans[1]],d2n:lvName(S.ans[1]+1),d3:'ABC'[S.ans[2]],d3n:lvName(S.ans[2]+1),
+    puntaje:pts,nivel:lvName(levelOf(pts)),testimonios:S.heard.size,hechos:Object.values(S.sort).filter(Boolean).length,
+    tprom:r1(S.times.reduce((a,b)=>a+b,0)/3),t1:r1(S.times[0]),t2:r1(S.times[1]),t3:r1(S.times[2])};
+}
+async function sendResult(){
+  const box=g('#send'); if(!box)return;
+  if(!SCRIPT_URL){box.className='send err';box.innerHTML='Esta copia todavía no está conectada a la planilla de la docente, así que la respuesta no se envió.';return;}
+  box.className='send wait';box.textContent='Enviando tus respuestas…';
+  try{
+    const r=await fetch(SCRIPT_URL,{method:'POST',body:JSON.stringify(payload())});
+    const j=await r.json(); if(!j.ok)throw new Error(j.error||'error');
+    S.sent=true;box.className='send ok';box.textContent='✓ Respuestas enviadas a la docente';
+  }catch(e){
+    box.className='send err';box.innerHTML='No se pudieron enviar las respuestas. Revisá tu conexión. <button class="chip" type="button" id="retry">Reintentar</button>';
+    g('#retry').onclick=sendResult;
+  }
+}
+
+function results(){
+  const pts=S.ans.reduce((s,a,d)=>s+DEC[d].opts[a].lv,0), lvl=levelOf(pts);
+  const sortOk=Object.values(S.sort).filter(Boolean).length, avg=S.times.reduce((a,b)=>a+b,0)/3;
+  const medals=[['Oído atento','Escuchaste los 4 testimonios.',S.heard.size===WIT.length],['Detective de hechos','Clasificaste bien las 6 frases.',sortOk===STM.length],
+    ['Sin apuro','Más de 8 s por decisión.',avg>8],['Mente abierta','Nivel alto con el dato nuevo.',S.ans[1]===2],['Solución justa','Nivel alto en la decisión final.',S.ans[2]===2]];
+  const col=['','var(--lv1)','var(--lv2)','var(--lv3)'][lvl], C=2*Math.PI*66;
+  show(`
+   <div class="hero-res">
+     <span class="eyebrow">Resultados · ${esc(S.name)}</span>
+     <div class="gauge"><svg viewBox="0 0 160 160"><circle cx="80" cy="80" r="66" stroke="rgba(255,255,255,.1)" stroke-width="13" fill="none"/><circle id="arc" cx="80" cy="80" r="66" stroke="${col}" stroke-width="13" fill="none" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="${C}" style="transition:stroke-dashoffset 1s ease"/></svg>
+       <div class="c"><div><div class="n">${pts}</div><div class="of">de 9 puntos</div></div></div></div>
+     <span class="badge lv${lvl}">Nivel ${lvName(lvl)}</span>
+     <h2>${INTERP[lvl]}</h2>
+   </div>
+   <div class="send wait" id="send" role="status">Enviando tus respuestas…</div>
+   <h3>Tus decisiones</h3>
+   <div class="recap">${S.ans.map((a,d)=>{const o=DEC[d].opts[a];return `<div><span class="num">${d+1}</span><p>${o.t}</p><span class="badge lv${o.lv}">${o.lv} pt</span></div>`;}).join('')}</div>
+   <h3>Cómo llegaste a tus decisiones</h3>
+   <div class="stats"><div><b>${S.heard.size}/4</b><small>testimonios escuchados</small></div><div><b>${sortOk}/6</b><small>hechos y suposiciones</small></div><div><b>${avg.toFixed(1)} s</b><small>por decisión</small></div></div>
+   <h3>Insignias</h3>
+   <div class="medals">${medals.map(m=>`<div class="medal ${m[2]?'got':''}"><b>${m[2]?'✓ ':''}${m[0]}</b><small>${m[1]}</small></div>`).join('')}</div>
+   <h3>Matriz de valoración</h3>
+   <div class="levels">${[1,2,3].map(l=>`<div class="${l===lvl?'hit':''}"><span class="badge lv${l}">${lvName(l)}</span><p>${MX[l-1]}</p></div>`).join('')}</div>
+   <button class="btn sec" id="again" type="button">Volver a empezar</button>
+  `,3);
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{const a=g('#arc');if(a)a.style.strokeDashoffset=C*(1-pts/9);}));
+  g('#again').onclick=()=>{reset();intro();};
+  sendResult();
+}
+
+/* ---------- panel docente ---------- */
+let ROWS=[], EXAMPLE=false, CLAVE_OK='';
+const p=s=>panel.querySelector(s);
+function panelLogin(msg){
+  panel.innerHTML=`<section class="page">
+    <span class="eyebrow">Panel docente</span>
+    <h2>Respuestas de todos</h2>
+    <p class="lead">Ingresá la clave que pusiste en tu Apps Script para ver los resultados del curso.</p>
+    ${!SCRIPT_URL?`<div class="send err"><span>Falta conectar la planilla: pegá la URL de tu Apps Script en <b>SCRIPT_URL</b>, al principio del archivo.</span></div>`:''}
+    <div class="field"><label for="clave">Clave</label><input type="password" id="clave" autocomplete="current-password"></div>
+    ${msg?`<p class="err-msg">${msg}</p>`:''}
+    <button class="btn" id="enter" type="button" ${SCRIPT_URL?'':'disabled'}>Ver respuestas ${AR}</button>
+    <button class="btn sec" id="demo" type="button">Ver con datos de ejemplo</button>
+    ${guideHTML()}
+  </section>`;
+  p('#clave').addEventListener('keydown',e=>{if(e.key==='Enter')p('#enter').click();});
+  p('#enter').onclick=()=>load(p('#clave').value);
+  p('#demo').onclick=()=>{EXAMPLE=true;ROWS=demoRows();renderPanel();};
+}
+async function load(clave){
+  panel.querySelector('#enter') && (p('#enter').disabled=true, p('#enter').textContent='Cargando…');
+  try{
+    const r=await fetch(SCRIPT_URL+'?clave='+encodeURIComponent(clave));
+    const j=await r.json();
+    if(!j.ok){panelLogin(j.error==='clave'?'La clave no es correcta.':'No se pudo leer la planilla.');return;}
+    CLAVE_OK=clave;EXAMPLE=false;ROWS=j.rows||[];renderPanel();
+  }catch(e){panelLogin('No se pudo conectar con la planilla. Revisá la URL y tu conexión.');}
+}
+function guideHTML(){return `<details><summary>Guía docente</summary>
+  <p class="muted" style="margin-bottom:10px">Se observa si el participante reacciona por suposiciones o si escucha, busca y compara información antes de decidir.</p>
+  <div class="lvl"><span class="badge lv1">Inicial</span><span class="muted">Acepta la acusación sin verificarla.</span></div>
+  <div class="lvl"><span class="badge lv2">Medio</span><span class="muted">Ve otras posibilidades, pero comprueba a medias.</span></div>
+  <div class="lvl"><span class="badge lv3">Alto</span><span class="muted">Busca y compara datos, no acusa sin pruebas.</span></div>
+  <p class="muted" style="margin-top:8px">1, 2 o 3 puntos por decisión. 3–4 inicial · 5–7 medio · 8–9 alto. En la planilla, A = inicial, B = medio y C = alto, como en la consigna (en la simulación el orden se mezcla).</p></details>`;}
+
+function renderPanel(){
+  const cursos=[...new Set(ROWS.map(r=>String(r.curso||'').trim()).filter(Boolean))].sort();
+  const sel=p('#fCurso')?p('#fCurso').value:'';
+  const rows=sel?ROWS.filter(r=>String(r.curso||'').trim()===sel):ROWS;
+  const n=rows.length;
+  const pct=x=>n?Math.round(x/n*100):0;
+  const avg=n?rows.reduce((s,r)=>s+(+r.puntaje||0),0)/n:0;
+  const lv=[0,0,0,0];rows.forEach(r=>lv[levelOf(+r.puntaje||0)]++);
+  const decStats=[1,2,3].map(d=>{const c={A:0,B:0,C:0};rows.forEach(r=>{const v=r['d'+d];if(c[v]!==undefined)c[v]++;});return c;});
+  const sorted=rows.slice().sort((a,b)=>String(b.fecha).localeCompare(String(a.fecha)));
+  const fmt=f=>{const d=new Date(f);return isNaN(d)?esc(f):d.toLocaleDateString('es-AR',{day:'2-digit',month:'2-digit'})+' '+d.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'});};
+  const lvColor=['','var(--lv1)','var(--lv2)','var(--lv3)'];
+  panel.innerHTML=`<section class="page">
+    <span class="eyebrow">Panel docente</span>
+    <div class="row" style="justify-content:space-between"><h2>Respuestas de todos</h2>${EXAMPLE?'<span class="example">Datos de ejemplo</span>':''}</div>
+    ${cursos.length?`<div class="field"><label for="fCurso">Filtrar por curso</label><select id="fCurso"><option value="">Todos los cursos</option>${cursos.map(c=>`<option ${c===sel?'selected':''}>${esc(c)}</option>`).join('')}</select></div>`:''}
+    ${n===0?`<div class="card"><p>Todavía no hay respuestas${sel?' para este curso':''}. Cuando alguien termine la simulación, va a aparecer acá.</p></div>`:`
+    <div class="kpis">
+      <div><b>${n}</b><small>participantes</small></div>
+      <div><b>${avg.toFixed(1)}</b><small>puntaje promedio (de 9)</small></div>
+      <div><b>${pct(lv[3])}%</b><small>en nivel alto</small></div>
+    </div>
+    <div class="card" style="display:flex;flex-direction:column;gap:10px">
+      <h3>Niveles del grupo</h3>
+      <div class="stack">${[1,2,3].map(l=>lv[l]?`<span style="width:${lv[l]/n*100}%;background:${lvColor[l]}"></span>`:'').join('')}</div>
+      <div class="legend">${[1,2,3].map(l=>`<span><i style="background:${lvColor[l]}"></i>${lvName(l)}: ${lv[l]} (${pct(lv[l])}%)</span>`).join('')}</div>
+    </div>
+    <div class="conc"><span class="tag" style="color:var(--accent)">Conclusión</span><ul>${conclusions(rows,lv,decStats,avg).map(c=>`<li>${c}</li>`).join('')}</ul></div>
+    ${decStats.map((c,i)=>`<div class="card dec"><h3>Decisión ${i+1}</h3><p class="muted">${DEC[i].q}</p><div class="bars">
+      ${['A','B','C'].map((k,j)=>`<div class="bar"><span>${k} · ${lvName(j+1)}</span><div class="t"><span style="width:${pct(c[k])}%;background:${lvColor[j+1]}"></span></div><em>${pct(c[k])}%</em></div>`).join('')}
+    </div></div>`).join('')}
+    <h3>Participantes</h3>
+    <div class="tbl"><table><thead><tr><th>Nombre</th><th>Curso</th><th>Puntaje</th><th>Nivel</th><th>D1</th><th>D2</th><th>D3</th><th>Testim.</th><th>Fecha</th></tr></thead><tbody>
+      ${sorted.map(r=>{const l=levelOf(+r.puntaje||0);return `<tr><td>${esc(r.nombre)}</td><td>${esc(r.curso)}</td><td class="num">${esc(r.puntaje)}/9</td><td><span class="badge lv${l}">${lvName(l)}</span></td><td>${esc(r.d1)}</td><td>${esc(r.d2)}</td><td>${esc(r.d3)}</td><td class="num">${esc(r.testimonios)}/4</td><td class="num">${fmt(r.fecha)}</td></tr>`;}).join('')}
+    </tbody></table></div>`}
+    <div class="row" style="flex-wrap:nowrap">
+      ${EXAMPLE?`<button class="btn sec" id="back" type="button">Salir del ejemplo</button>`:`<button class="btn" id="refresh" type="button">Actualizar</button><button class="btn sec" id="logout" type="button">Salir</button>`}
+    </div>
+    ${guideHTML()}
+  </section>`;
+  if(p('#fCurso'))p('#fCurso').onchange=renderPanel;
+  if(p('#refresh'))p('#refresh').onclick=()=>load(CLAVE_OK);
+  if(p('#logout'))p('#logout').onclick=()=>{CLAVE_OK='';ROWS=[];panelLogin();};
+  if(p('#back'))p('#back').onclick=()=>{EXAMPLE=false;ROWS=[];panelLogin();};
+}
+
+function conclusions(rows,lv,dec,avg){
+  const n=rows.length,pct=x=>Math.round(x/n*100),out=[];
+  const top=[1,2,3].reduce((a,b)=>lv[b]>lv[a]?b:a,1);
+  out.push(`El grupo tiene un puntaje promedio de <b>${avg.toFixed(1)} sobre 9</b>, que corresponde a un nivel <b>${lvName(levelOf(Math.round(avg))).toLowerCase()}</b>. El nivel más frecuente es el <b>${lvName(top).toLowerCase()}</b> (${pct(lv[top])}%).`);
+  const decAvg=dec.map(c=>(c.A*1+c.B*2+c.C*3)/Math.max(1,c.A+c.B+c.C));
+  const worst=decAvg.indexOf(Math.min(...decAvg)), best=decAvg.indexOf(Math.max(...decAvg));
+  const wc=dec[worst];
+  if(worst!==best)out.push(`La decisión que más costó fue la <b>${worst+1}</b>: ${pct(wc.A)}% eligió la opción inicial y ${pct(wc.B)}% la intermedia. La que mejor resolvieron fue la <b>${best+1}</b> (${pct(dec[best].C)}% eligió la opción de nivel alto).`);
+  else out.push(`Las tres decisiones tuvieron resultados parecidos.`);
+  const d1=dec[0],d2=dec[1];
+  if(d2.C>d1.C)out.push(`Más participantes llegaron al nivel alto en la decisión 2 (${pct(d2.C)}%) que en la 1 (${pct(d1.C)}%): con información nueva, varios revisaron su postura inicial.`);
+  else if(d2.A>0)out.push(`${pct(d2.A)}% mantuvo la acusación cuando apareció información nueva, lo que muestra dificultad para revisar una conclusión.`);
+  const all=rows.filter(r=>+r.testimonios===4),less=rows.filter(r=>+r.testimonios<4);
+  const m=a=>a.reduce((s,r)=>s+(+r.puntaje||0),0)/a.length;
+  if(all.length&&less.length)out.push(`Quienes escucharon los 4 testimonios sacaron en promedio <b>${m(all).toFixed(1)}</b> puntos, contra <b>${m(less).toFixed(1)}</b> de quienes escucharon menos.`);
+  const tp=rows.reduce((s,r)=>s+(+r.tprom||0),0)/n, hs=rows.reduce((s,r)=>s+(+r.hechos||0),0)/n;
+  out.push(`En promedio tardaron <b>${tp.toFixed(1)} s</b> por decisión y clasificaron bien <b>${hs.toFixed(1)} de 6</b> frases entre hechos y suposiciones.`);
+  return out;
+}
+
+function demoRows(){
+  const names=['Ana','Bruno','Camila','Diego','Elena','Facundo','Gimena','Hernán','Iara','Julián','Karen','Lucía'];
+  let seed=7;const rnd=()=>{seed=(seed*9301+49297)%233280;return seed/233280;};
+  const pick=w=>{const r=rnd();return r<w[0]?'A':r<w[0]+w[1]?'B':'C';};
+  return names.map((nm,i)=>{const t=Math.floor(rnd()*5);const sk=t/4;
+    const d=[pick([.35-sk*.25,.35,.3+sk*.25]),pick([.25-sk*.2,.35,.4+sk*.2]),pick([.15,.35,.5])];
+    const pts=d.reduce((s,x)=>s+'ABC'.indexOf(x)+1,0);
+    return {fecha:new Date(Date.now()-i*3600e3).toISOString(),nombre:nm+' (ejemplo)',curso:i%2?'1.° A':'1.° B',d1:d[0],d2:d[1],d3:d[2],puntaje:pts,nivel:lvName(levelOf(pts)),testimonios:t,hechos:3+Math.floor(rnd()*4),tprom:Math.round((4+rnd()*12)*10)/10};});
+}
+
+if(MODO==='docente'){game.hidden=true;panel.hidden=false;$('#prog').style.visibility='hidden';panelLogin();}
+else{reset();intro();}
+})();
+</script>
+</body>
+</html>
